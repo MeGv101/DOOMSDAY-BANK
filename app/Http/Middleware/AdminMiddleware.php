@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Models\User;
-
+use Illuminate\Support\Facades\Auth;
 class AdminMiddleware
 {
     /**
@@ -16,14 +16,14 @@ class AdminMiddleware
      */
     public function handle($request, Closure $next)
     {
-        $user = User::find(session('user_id'));
-
-        if (!$user) {
+        if (!Auth::check()) {
             return redirect('/login');
         }
 
-        if (strtolower($user->role) !== 'admin') {
-            return redirect('/dashboard')->with('error', 'Acceso denegado');
+        if (Auth::user()->role !== 'admin') {
+
+            return redirect('/dashboard')
+                ->with('error', 'Acceso denegado');
         }
 
         return $next($request);

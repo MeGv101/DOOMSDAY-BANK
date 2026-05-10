@@ -22,6 +22,13 @@
 
         <input type="password" autocomplete="off" name="password" placeholder="Contraseña"
             class="w-full p-2 mb-4 rounded bg-gray-700 text-white border border-gray-600">
+        
+        <div class="mb-4 flex items-center gap-2">
+            <input type="checkbox" name="remember">
+            <label class="text-white">
+                Recordarme
+            </label>
+        </div>
 
         <button class="w-full bg-blue-600 p-2 rounded text-white hover:bg-blue-700">
             Entrar

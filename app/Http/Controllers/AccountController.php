@@ -5,31 +5,51 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Account;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\Auth;
 
 
 class AccountController extends Controller
 {
     public function index()
     {
-        $accounts = Account::where('user_id', session('user_id'))->get();
-        $transactions = Transaction::whereIn('account_id', $accounts->pluck('id'))
-            ->latest()
-            ->get();
-        return view('transactions.index', compact('accounts', 'transactions'));
+        $accounts = Account::where(
+            'user_id',
+            Auth::id()
+        )->get();
+
+        $transactions = Transaction::whereIn(
+            'account_id',
+            $accounts->pluck('id')
+        )
+        ->latest()
+        ->get();
+
+        return view(
+            'transactions.index',
+            compact('accounts', 'transactions')
+        );
     }
     public function deposit(Request $request)
     {
         $request->validate([
             'account_id' => 'required|exists:accounts,id',
-            'amount' => 'required|numeric|min:1'
+            'amount' => 'required|numeric|min:1|max:1000000'
         ]);
 
-        $account = Account::findOrFail($request->account_id);
-        
+        $account = Account::findOrFail(
+            $request->account_id
+        );
+
         if ($account->balance < $request->amount) {
-            return back()->with('error', 'Fondos insuficientes');
+
+            return back()->with(
+                'error',
+                'Fondos insuficientes'
+            );
         }
+
         $account->balance -= $request->amount;
+
         $account->save();
 
         Transaction::create([
@@ -39,7 +59,10 @@ class AccountController extends Controller
             'balance_after' => $account->balance
         ]);
 
-        return back()->with('success', 'Depósito realizado');
+        return back()->with(
+            'success',
+            'Transferencia realizada'
+        );
     }
 
     public function withdraw(Request $request)
@@ -49,8 +72,20 @@ class AccountController extends Controller
             'amount' => 'required|numeric|min:1'
         ]);
 
-        $account = Account::findOrFail($request->account_id);
+        $account = Account::findOrFail(
+            $request->account_id
+        );
+
+        if (($account->balance + $request->amount) > 9999999999.99) {
+
+            return back()->with(
+                'error',
+                'El saldo excede el límite permitido'
+            );
+        }
+
         $account->balance += $request->amount;
+
         $account->save();
 
         Transaction::create([
@@ -60,6 +95,9 @@ class AccountController extends Controller
             'balance_after' => $account->balance
         ]);
 
-        return back()->with('success', 'Retiro realizado');
+        return back()->with(
+            'success',
+            'Dinero recibido'
+        );
     }
 }

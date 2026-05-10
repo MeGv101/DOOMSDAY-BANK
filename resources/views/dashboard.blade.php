@@ -16,6 +16,13 @@
     Swal.fire('Error', '{{ session('error') }}', 'error');
     </script>
     @endif
+
+    @if(session('info'))
+    <script>
+    Swal.fire('Recuerda...', '{{ session('info') }}', 'info');
+    </script>
+    @endif
+    
     <div class="grid grid-cols-3 gap-4">
 
         <a href="/transactions" class="bg-white p-6 rounded shadow hover:bg-gray-50">

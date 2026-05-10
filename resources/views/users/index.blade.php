@@ -40,8 +40,7 @@
 
                     <td class="p-3 text-center">
 
-                        <a href="#" onclick="deleteUser({{ $user->id }})"
-                            class="text-red-600 hover:underline">
+                        <a href="#" onclick="deleteUser({{ $user->id }})" class="text-red-600 hover:underline">
                             Eliminar
                             </a>
 
@@ -59,6 +58,9 @@
                                 });
                             }
                             </script>
+                        <a href="/users/{{ $user->id }}/edit" class="bg-blue-600 text-white px-3 py-1 rounded">
+                            Editar
+                        </a>
 
                     </td>
                 </tr>

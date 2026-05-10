@@ -17,15 +17,23 @@
             ← Volver
         </a>
     </div>
-    @if(session('success'))
+    @if(session('error'))
     <script>
-    Swal.fire('Éxito', '{{ session('success') }}', 'success');
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: '{{ session('error') }}'
+    });
     </script>
     @endif
 
-    @if(session('error'))
+    @if(session('success'))
     <script>
-    Swal.fire('Error', '{{ session('error') }}', 'error');
+    Swal.fire({
+        icon: 'success',
+        title: 'Éxito',
+        text: '{{ session('success') }}'
+    });
     </script>
     @endif
     <div class="bg-white p-6 rounded shadow mb-6">
@@ -80,6 +88,59 @@
     </div>
 
 </div>
+<div class="bg-white p-6 rounded shadow mt-6">
 
+    <h2 class="text-2xl font-bold mb-4">
+        Historial de Transacciones
+    </h2>
+
+    <table class="w-full border-collapse">
+
+        <thead>
+            <tr class="bg-gray-200">
+                <th class="p-2 text-left">Tipo</th>
+                <th class="p-2 text-left">Monto</th>
+                <th class="p-2 text-left">Saldo Final</th>
+                <th class="p-2 text-left">Fecha</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @forelse($transactions as $t)
+            <tr class="border-b">
+
+                <td class="p-2">
+                    {{ $t->type }}
+                </td>
+
+                <td class="p-2">
+                    ${{ $t->amount }}
+                </td>
+
+                <td class="p-2">
+                    ${{ $t->balance_after }}
+                </td>
+
+                <td class="p-2">
+                    {{ $t->created_at }}
+                </td>
+
+            </tr>
+            @empty
+
+            <tr>
+                <td colspan="4" class="p-4 text-center text-gray-500">
+                    No hay transacciones todavía
+                </td>
+            </tr>
+
+            @endforelse
+
+        </tbody>
+
+    </table>
+
+</div>
 </body>
 </html>

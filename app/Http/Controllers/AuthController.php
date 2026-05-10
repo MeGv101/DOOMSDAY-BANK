@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 
 class AuthController extends Controller
@@ -54,40 +55,76 @@ class AuthController extends Controller
     return redirect('/login');
 }
 
-    public function login(Request $request) {
-        $user = User::where('email', $request->email)->first();
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
+
+        $user = User::where(
+            'email',
+            $request->email
+        )->first();
 
         if (!$user) {
-            return back()->with('error', 'Usuario no existe');
+
+            return back()->with(
+                'error',
+                'Usuario no existe'
+            );
         }
 
-        if ($user->lock_until && now()->lt($user->lock_until)) {
-            return back()->with('error', 'Cuenta bloqueada');
+        if (
+            $user->lock_until &&
+            now()->lt($user->lock_until)
+        ) {
+
+            return back()->with(
+                'error',
+                'Cuenta bloqueada temporalmente'
+            );
         }
 
-        if (Hash::check($request->password, $user->password)) {
-            $user->failed_attempts = 0;
-            $user->lock_until = null;
-            $user->save();
+        if (
+            Auth::attempt(
+                $credentials,
+                $request->has('remember')
+            )
+        ) {
 
-            session(['user_id' => $user->id]);
             $request->session()->regenerate();
 
-            return redirect('/dashboard')->with('success', 'Bienvenido/a de nuevo');
-        } else {
-            $user->failed_attempts++;
-
-            if ($user->failed_attempts >= 3) {
-                $user->lock_until = now()->addMinutes(5);
-            }
+            $user->failed_attempts = 0;
+            $user->lock_until = null;
 
             $user->save();
 
-            return back()->with('error', 'Credenciales incorrectas');
+            return redirect('/dashboard')
+                ->with(
+                    'success',
+                    'Bienvenido/a de nuevo'
+                );
         }
+
+        $user->failed_attempts++;
+
+        if ($user->failed_attempts >= 3) {
+
+            $user->lock_until =
+                now()->addMinutes(5);
+        }
+
+        $user->save();
+
+        return back()->with(
+            'error',
+            'Credenciales incorrectas'
+        );
     }
 
     public function logout(Request $request) {
+        Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

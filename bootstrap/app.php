@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
     })
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias([
+            'guest.custom' => \App\Http\Middleware\GuestMiddleware::class,
+        ]);
+    })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
